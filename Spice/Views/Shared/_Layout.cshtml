@@ -1,0 +1,353 @@
+﻿@using Spice.Utility
+@using Microsoft.AspNetCore.Http
+
+@inject IHttpContextAccessor HttpContextAccessor
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] EShop</title>
+
+    <environment include="Development">
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="~/css/jquery-ui.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" />
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css"
+              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute"
+              crossorigin="anonymous"
+              integrity="sha256-eSi1q2PG6J7g7ib17yAaWMcrr5GrtohYChqibrV7PBE=" />
+        <link rel="stylesheet" href="~/css/jquery-ui.css" />
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    </environment>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <style>
+        body {
+            font-family: "Lato", sans-serif;
+        }
+
+        .sidenav {
+            height: 100%;
+            width: 119px;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            overflow-x: hidden;
+            padding-top: 5px;
+        }
+            .sidenav a, .dropdown-btn {
+                padding: 6px 8px 6px 1px;
+                text-decoration: none;
+                font-size: 18px;
+                color: #818181;
+                display: block;
+                border: none;
+                background: none;
+                width: 100%;
+                text-align: left;
+                cursor: pointer;
+                outline: none;
+            }
+        .active {
+            background-color: green;
+            color: white;
+        }
+                .sidenav a:hover,.dropdown-btn:hover {
+                    color: #f1f1f1;
+                }
+
+        .main {
+            margin-left: 200px; /* Same as the width of the sidenav */
+        }
+        .dropdown-container {
+            display: none;
+            background-color: #262626;
+            padding-left: 8px;
+            
+        }
+        @@media screen and (max-height: 450px) {
+            .sidenav {
+                padding-top: 10px;
+            }
+
+                .sidenav a {
+                    font-size: 10px;
+                }
+        }
+    </style>
+</head>
+
+<body class="search-background">
+
+    <header>
+
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
+            <div class="container">
+                @if (User.IsInRole(SD.ManagerUser))
+                {
+                    @*<a class="navbar-brand" asp-area="Customer" asp-controller="Home" asp-action="Index">
+
+                        <label class="text-info" style="cursor:pointer">EShop</label>
+                    </a>*@
+                }
+                else
+                {
+                <a class="navbar-brand" asp-area="Customer" asp-controller="Home" asp-action="Index">
+
+                    <label class="text-info" style="cursor:pointer">EShop</label>
+                </a>
+                }
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+
+
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <partial name="_LoginPartial" />
+
+
+
+
+
+                    @if (User.IsInRole(SD.CustomerEndUser) || User.IsInRole(SD.FrontDeskUser) || User.IsInRole(SD.KitchenUser))
+                    {
+                <ul class="navbar-nav flex-grow-1">
+
+                    @* filter by order history personal and ALL *@
+                    <li class="nav-item dropdown text-white-50">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Order History
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropDownMenuLink">
+
+
+
+                            <a class="dropdown-item" asp-action="OrderHistory" asp-controller="Order" asp-area="Customer">Order History Personal</a>
+                        </div>
+
+                    </li>
+                    @if (User.IsInRole(SD.FrontDeskUser) || User.IsInRole(SD.KitchenUser))
+                    {
+                        <li class="nav-item dropdown text-white-50">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Order
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropDownMenuLink">
+                                @if (User.IsInRole(SD.KitchenUser) )
+                                {
+                                    <a class="dropdown-item" asp-action="ManageOrder" asp-controller="Order" asp-area="Customer">Manage Order</a>
+                                }
+                                @if (User.IsInRole(SD.FrontDeskUser))
+                                {
+                                    <a class="dropdown-item" asp-action="OrderPickup" asp-controller="Order" asp-area="Customer">Order Pickup</a>
+                                }
+                            </div>
+
+                        </li>
+                    }
+
+                    @if (HttpContextAccessor.HttpContext.Session.GetInt32(@SD.ssShoppingCartCount) != null)
+                    {
+                <li style="color:white">
+                    <a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="nav-link">
+                        @{ var count = HttpContextAccessor.HttpContext.Session.GetInt32(@SD.ssShoppingCartCount); }
+                        <i class="fas fa-shopping-cart"></i> &nbsp; (@count)
+                    </a>
+                </li>
+ }
+            else
+            {
+                <li style="color:white">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i> &nbsp; (0)
+                    </a>
+                </li>
+}
+                </ul>}
+
+
+                </div>
+
+                <div id="google_translate_element"></div>
+                <script type="text/javascript">
+                    function googleTranslateElementInit() {
+                        new google.translate.TranslateElement({ pageLanguage: 'en' }, 'google_translate_element');
+                    }
+                </script>
+
+                <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+
+            </div>
+
+        </nav>
+    </header>
+    @if (User.IsInRole(SD.ManagerUser))
+    {
+<div class="sidenav">
+
+    <a class="navbar-brand" style="font-size:36px" asp-area="Customer" asp-controller="Home" asp-action="Index">
+
+        <label class="text-info" style="cursor:pointer">EShop</label>
+    </a>
+    @if (HttpContextAccessor.HttpContext.Session.GetInt32(@SD.ssShoppingCartCount) != null)
+    {
+
+    <a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="nav-link">
+        @{ var count = HttpContextAccessor.HttpContext.Session.GetInt32(@SD.ssShoppingCartCount); }
+        <i class="fas fa-shopping-cart"></i> &nbsp; (@count)
+    </a>
+ }
+                else
+                {
+
+    <a href="#" class="nav-link">
+        <i class="fas fa-shopping-cart"></i> &nbsp; (0)
+    </a>
+}
+    <a href="#">DashBoard</a>
+    <a href="#">Chart</a>
+    <a href="#">Features</a>
+    <button class="dropdown-btn">
+        Manager
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+
+        <a style="font-size: 15px" asp-action="Index" asp-controller="Category" asp-area="Admin">Category</a>
+        <a style="font-size: 15px" asp-action="Index" asp-controller="SubCategory" asp-area="Admin">Sub Category</a>
+        <a style="font-size: 15px" asp-action="Index" asp-controller="MenuItem" asp-area="Admin">MenuItem</a>
+        <a style="font-size: 15px" asp-action="Index" asp-controller="Coupon" asp-area="Admin">Coupons</a>
+        <a style="font-size: 15px" asp-action="Index" asp-controller="User" asp-area="Admin">Users</a>
+    </div>
+
+    <button class="dropdown-btn">
+        History
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+
+        <a style="font-size: 15px" asp-action="OrderHistoryAll" asp-controller="OrderHistory" asp-area="Admin">All History</a>
+
+        <a style="font-size: 15px" asp-action="OrderHistory" asp-controller="Order" asp-area="Customer">Personal History </a>
+    </div>
+
+    <button class="dropdown-btn">
+        Order
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+
+        <a style="font-size: 15px" asp-action="ManageOrder" asp-controller="Order" asp-area="Customer">Manage Order</a>
+
+        <a style="font-size: 15px" asp-action="OrderPickup" asp-controller="Order" asp-area="Customer">Order Pickup</a>
+
+    </div>
+
+
+</div>}
+
+    <div class="container">
+        <partial name="_CookieConsentPartial" />
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <div class="footer-dark">
+        <footer>
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-6 col-md-3 item">
+                        <h3>Services</h3>
+                        <ul>
+                            <li><a href="#">Organization</a></li>
+                            <li><a href="#">Host Party</a></li>
+                            <li><a href="#">About</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-6 col-md-3 item">
+                        <h3>About</h3>
+                        <ul>
+                            <li><a href="#">Company</a></li>
+                            <li><a href="#">Team</a></li>
+                            <li><a href="#">Careers</a></li>
+                        </ul>
+                    </div>
+                    <div id="Map-ShopDaKi" class="col-md-6 item text">
+                        <h3>Google MAP</h3>
+                        <div id="map-container-google-1" class="z-depth-1-half map-container">
+                            <iframe allowfullscreen frameborder="0" src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAEBGNYcsskKEZ3wzdxCicHWrz_XAOnC3o&amp;q=University+of+Technology+and+Education+Ho+Chi+Minh+city%2C+V%C3%B5+V%C4%83n+Ng%C3%A2n%2C+Linh+Chi%E1%BB%83u%2C+Th%E1%BB%A7+%C4%90%E1%BB%A9c%2C+Ho+Chi+Minh+City&amp;zoom=15"
+                                    width="100%" height="250px"></iframe>
+                        </div>
+                    </div>
+                    <div class="col item social">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-snapchat-ghost"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <p class="copyright">EShop © 2020</p>
+            </div>
+        </footer>
+    </div>
+
+
+    <environment include="Development">
+        <script src="https://cloud.tinymce.com/stable/tinymce.min.js?apiKey=n94ifuzvl80pchikopiwgz2esrw8n28dwcywvpejlqrregfp"></script>
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
+        <script src="~/js/jquery-ui.js"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="https://cloud.tinymce.com/stable/tinymce.min.js?apiKey=n94ifuzvl80pchikopiwgz2esrw8n28dwcywvpejlqrregfp"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+                asp-fallback-test="window.jQuery"
+                crossorigin="anonymous"
+                integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.bundle.min.js"
+                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"
+                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
+                crossorigin="anonymous"
+                integrity="sha256-E/V4cWE4qvAeO5MOhjtGtqDzPndRO1LBk8lJ/PR7CA4=">
+        </script>
+        <script src="~/js/jquery-ui.js"></script>
+    </environment>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        /* Loop through all dropdown buttons to toggle between hiding and showing its dropdown content - This allows the user to have multiple dropdowns without any conflict */
+        var dropdown = document.getElementsByClassName("dropdown-btn");
+        var i;
+
+        for (i = 0; i < dropdown.length; i++) {
+            dropdown[i].addEventListener("click", function () {
+                this.classList.toggle("active");
+                var dropdownContent = this.nextElementSibling;
+                if (dropdownContent.style.display === "block") {
+                    dropdownContent.style.display = "none";
+                } else {
+                    dropdownContent.style.display = "block";
+                }
+            });
+        }
+    </script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
+
+
+

@@ -1,0 +1,77 @@
+﻿@model IEnumerable<SubCategory>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+    <div class="border backgroundWhite">
+        <div class="row">
+            <div class="col-6">
+                <h2 class="text-info "> Sub Category List</h2>
+            </div>
+            <div class="col-6 text-right">
+                <partial name="_CreateButtonPartial" />
+            </div>
+        </div>
+        <br />
+        @*Getemployeedetails*@
+        <form method="get" asp-action="Index">
+            <p>
+                <input type="search" placeholder="enter name" value="@ViewData["Getemployeedetails"]" name="SubCategory" style="width:200px" />
+                <button class="btn btn-primary" type="submit" value="Search">
+                    <i class="fa fa-search"></i>
+                </button>
+                <a asp-action="Index" class="btn btn-primary">Show All</a>
+            </p>
+        </form>
+        @*<form asp-controller="Home" asp-action="Index">
+            <p>
+                Title:<input type="text" name="SearchString" />
+                <input type="submit" value="Search" />
+            </p>
+        </form>*@
+        @*<ul class="navbar-nav flex-grow-1">
+            <form method="get" asp-action="Index" asp-controller="Home" class="form-inline my-2 my-md-0">
+                <input class="form-control py-2 border-right-0 border" name="name" type="search" placeholder="enter name" value="@ViewData["Getemployeedetails"]" id="example-search-input">
+                <span class="input-group-append">
+                    <button class="btn btn-outline-secondary border-left-0 border bg-dark" type="submit">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </span>
+            </form>
+        </ul>*@
+        <div>
+            @if (Model.Count() > 0)
+            {
+    <table class="table table-striped border">
+        <tr class="table-secondary">
+            <th>
+                @Html.DisplayNameFor(m => m.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(m => m.Category.Name)
+            </th>
+            <th></th>
+            <th></th>
+        </tr>
+        @foreach (var item in Model)
+        {
+    <tr>
+        <td>
+            @Html.DisplayFor(m => item.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(m => item.Category.Name)
+        </td>
+        <td>
+            <partial name="_TableButtonPartial" model="item.Id" />
+        </td>
+    </tr>
+}
+    </table> }
+else
+{
+    <p>No Sub Category exists...</p>}
+        </div>
+    </div>
+
